@@ -1,5 +1,5 @@
 # 🔒 eme: *Encryption Made Easy*
-*an extremely simple encryption tool written in Rust*
+*an extremely simple AES-256 encryption tool written in Rust*
 
 ## Usage:
 ```bash
