@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    
+    - name: Install Cross
+      run: cargo install cross --git https://github.com/cross-rs/cross --locked
+
+
+    - name: Build Linux x64
+      run: cross build --target x86_64-unknown-linux-gnu --release
+ 
+    - name: Upload Linux x64 Build Artifact
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: eme-linux
+        path: target/x86_64-unknown-linux-gnu/release/eme
+ 
+ 
+    - name: Build Windows x64
+      run: cross build --target x86_64-pc-windows-gnu --release
+        
+    - name: Upload Windows x64 Build Artifact
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: eme-windows
+        path: target/x86_64-pc-windows-gnu/release/eme.exe
