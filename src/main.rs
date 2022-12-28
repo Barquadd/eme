@@ -51,8 +51,7 @@ fn main() {
         for _ in 0..12 {
             nonce_vec.push(rand::random::<u8>());
         }
-        let nonce_vec_2 = nonce_vec.clone();
-        let nonce = Nonce::from_slice(&nonce_vec_2);
+        let nonce = Nonce::from_slice(&nonce_vec);
 
         println!("Reading file...");
         let mut buffer: Vec<u8> = std::fs::read(args.path.clone()).expect("Failed to read file.");
