@@ -5,7 +5,7 @@ use aes_gcm::{
     aead::{AeadInPlace, KeyInit, generic_array::GenericArray},
     Aes256Gcm, Nonce
 };
-use std::io;
+use std::io::{stdin, stdout};
 use sha2::{Digest, Sha256};
 
 
@@ -30,19 +30,23 @@ fn hash_string_n_times(s: &str, n: u32) -> Vec<u8> {
     result
 }
 
+fn get_user_pass() -> Vec<u8> {
+    print!("Enter the password: ");
+    stdout().flush().unwrap();
+    let mut password = String::new();
+    stdin().read_line(&mut password).unwrap();
+    let password = password.trim();
+
+    let key: Vec<u8> = hash_string_n_times(&password, 100_000);
+    key
+}
+
 fn main() {
     let args = Cli::parse();
     if args.encrypt {
         println!("--> ENCRYPTING <--");
-        print!("Enter the password: ");
-        // getting user password
-        std::io::stdout().flush().unwrap();
-        let mut password = String::new();
-        io::stdin().read_line(&mut password).unwrap();
-        let password = password.trim();
 
-        let key: Vec<u8> = hash_string_n_times(&password, 100_000);
-
+        let key: Vec<u8> = get_user_pass();
         let key_g: GenericArray<_, U32> = GenericArray::clone_from_slice(&key);
 
         let cipher = Aes256Gcm::new(&key_g);
@@ -63,24 +67,16 @@ fn main() {
     }
     else if args.decrypt {
         println!("--> DECRYPTING <--");
-        print!("Enter the password: ");
-        std::io::stdout().flush().unwrap();
-        let mut password = String::new();
-        io::stdin().read_line(&mut password).unwrap();
-        let password = password.trim();
 
-        let key: Vec<u8> = hash_string_n_times(&password, 100_000);
-
+        let key: Vec<u8> = get_user_pass();
         let key_g: GenericArray<_, U32> = GenericArray::clone_from_slice(&key);
 
         let cipher = Aes256Gcm::new(&key_g);
-
         println!("Reading file...");
         let buffer: Vec<u8> = std::fs::read(args.path.clone()).expect("Failed to read file.");
         // the first 12 bytes of the buffer is (should be) the nonce
         let (nonce_bytes, buffer) = buffer.split_at(12);
         let nonce = Nonce::from_slice(&nonce_bytes);
-
         let mut buffer = buffer.to_vec();
         println!("Decrypting...");
         cipher.decrypt_in_place(nonce, b"", &mut buffer).expect("Decryption failed.");
