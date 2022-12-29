@@ -1,4 +1,4 @@
-use std::{fs::write, io::Write, str};
+use std::{fs::write, io::Write};
 use aes_gcm::aead::consts::U32;
 use clap::Parser;
 use aes_gcm::{
@@ -20,19 +20,6 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn hash_string_n_times(s: &str, n: u32) -> Vec<u8> {
-    let mut hasher = Sha256::new();
-    let mut result = s.as_bytes().to_vec();
-    for _ in 0..n {
-        let mut hasher_clone = hasher.clone();
-        hasher_clone.update(&result);
-        result = hasher_clone.finalize().to_vec();
-        hasher.reset();
-    }
-    result
-}
-
-// may be redundant considering the above function
 fn hash_vec_n_times(v: &Vec<u8>, n: u32) -> Vec<u8> {
     let mut hasher = Sha256::new();
     let mut result = v.clone();
@@ -51,8 +38,9 @@ fn get_user_pass() -> Vec<u8> {
     let mut password = String::new();
     stdin().read_line(&mut password).unwrap();
     let password = password.trim();
+    let password: Vec<u8> = password.as_bytes().to_vec();
 
-    let key: Vec<u8> = hash_string_n_times(&password, 100_000);
+    let key: Vec<u8> = hash_vec_n_times(&password, 100_000);
     key
 }
 
@@ -65,12 +53,12 @@ fn main() {
 
     let key = match args.keyfile {
         Some(keyfile) => {
+            println!("Reading keyfile...");
             let key = std::fs::read(keyfile).unwrap();
             let key: Vec<u8> = hash_vec_n_times(&key, 100_000);
             key
         }
         None => {
-            // prompt for a password and do all that fun stuff if the user doesn't supply a keyfile
             let key: Vec<u8> = get_user_pass();
             key
         }
