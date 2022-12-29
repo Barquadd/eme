@@ -7,7 +7,9 @@
 eme --encrypt secret.png
 # To decrypt:
 eme --decrypt secret.png
+# Encrypt using a keyfile:
+eme --keyfile key --encrypt secret.png
 ```
 
 ### ⚠️ Warning! This encrypts files in-place! ⚠️
-Do not lose the password that you encrypt your files with! 
+Do not lose the password/keyfile that you encrypt your files with! 
