@@ -1,13 +1,12 @@
-use std::{fs::write, io::Write};
 use aes_gcm::aead::consts::U32;
-use clap::Parser;
 use aes_gcm::{
-    aead::{AeadInPlace, KeyInit, generic_array::GenericArray},
-    Aes256Gcm, Nonce
+    aead::{generic_array::GenericArray, AeadInPlace, KeyInit},
+    Aes256Gcm, Nonce,
 };
-use std::io::{stdin, stdout};
+use clap::Parser;
 use sha2::{Digest, Sha256};
-
+use std::io::{stdin, stdout};
+use std::{fs::write, io::Write};
 
 #[derive(Parser)]
 struct Cli {
@@ -46,10 +45,17 @@ fn get_user_pass() -> Vec<u8> {
 
 fn main() {
     let args = Cli::parse();
-    if {args.encrypt} == {args.decrypt} {
+    if { args.encrypt } == { args.decrypt } {
         panic!("You must specify either --encrypt or --decrypt");
     }
-    println!("--> {} <--", if args.encrypt { "ENCRYPTING" } else { "DECRYPTING" });
+    println!(
+        "--> {} <--",
+        if args.encrypt {
+            "ENCRYPTING"
+        } else {
+            "DECRYPTING"
+        }
+    );
 
     let key = match args.keyfile {
         Some(keyfile) => {
@@ -77,12 +83,13 @@ fn main() {
         println!("Reading file...");
         let mut buffer: Vec<u8> = std::fs::read(args.path.clone()).expect("Failed to read file.");
         println!("Encrypting...");
-        cipher.encrypt_in_place(nonce, b"", &mut buffer).expect("Encryption failed.");
+        cipher
+            .encrypt_in_place(nonce, b"", &mut buffer)
+            .expect("Encryption failed.");
         nonce_vec.append(&mut buffer); // we want the nonce to be the first 96 bits in the file
         println!("Writing file...");
         write(args.path, nonce_vec).expect("Failed to write file.");
-    }
-    else if args.decrypt {
+    } else if args.decrypt {
         println!("Reading file...");
         let buffer: Vec<u8> = std::fs::read(args.path.clone()).expect("Failed to read file.");
         // the first 12 bytes of the buffer is (should be) the nonce
@@ -90,7 +97,9 @@ fn main() {
         let nonce = Nonce::from_slice(&nonce_bytes);
         let mut buffer = buffer.to_vec();
         println!("Decrypting...");
-        cipher.decrypt_in_place(nonce, b"", &mut buffer).expect("Decryption failed.");
+        cipher
+            .decrypt_in_place(nonce, b"", &mut buffer)
+            .expect("Decryption failed.");
         println!("Writing file...");
         write(args.path, buffer).expect("Failed to write file.");
     }
