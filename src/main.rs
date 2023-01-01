@@ -6,6 +6,7 @@ use aes_gcm::{
 use clap::{arg, command, value_parser};
 use sha2::{Digest, Sha256};
 use std::{fs::write, path::PathBuf};
+use zeroize::Zeroize;
 
 fn hash_vec_n_times(v: &Vec<u8>, n: u32) -> Vec<u8> {
     let mut hasher = Sha256::new();
@@ -22,8 +23,9 @@ fn hash_vec_n_times(v: &Vec<u8>, n: u32) -> Vec<u8> {
 fn get_user_pass() -> Vec<u8> {
     let password = rpassword::prompt_password("Please enter a password: ").unwrap();
     let password = password.trim();
-    let password: Vec<u8> = password.as_bytes().to_vec();
+    let mut password: Vec<u8> = password.as_bytes().to_vec();
     let key: Vec<u8> = hash_vec_n_times(&password, 100_000);
+    password.zeroize();
     key
 }
 
