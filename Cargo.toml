@@ -12,6 +12,6 @@ strip = true
 
 [dependencies]
 aes-gcm = "0.10.1"
-clap = {version="4.0.32", features=["derive"]}
+clap = {version="4.0.32", features=["cargo"]}
 rand = "0.8.5"
 sha2 = "0.10.6"
