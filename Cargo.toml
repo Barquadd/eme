@@ -14,4 +14,5 @@ strip = true
 aes-gcm = "0.10.1"
 clap = {version="4.0.32", features=["cargo"]}
 rand = "0.8.5"
+rpassword = "7.2.0"
 sha2 = "0.10.6"
